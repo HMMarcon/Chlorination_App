@@ -203,6 +203,19 @@ def run_model_svd(model_key, mol):
         predicted_product = compare_FP_to_products_MCC(predictions_FP[0], possible_prods(Chem.MolFromSmiles(reactant)))[2]
         return predicted_product
 
+
+st.text("This app predicts the most likely product of a chlorination reaction on an aromatic system. \n"
+        "The model is based on extracting the Morgan fingerprints of starting materials (SM), using a tuned ML model to predict the fingerprint of the product.\n"
+        "A list of possible products is then generated from the SM and the product with the most similar FP to the predicted one is selected as the predicted product. "
+        "Below you can see a general scheme of the workflow\n ")
+
+st.image("workflow.png", height=500)
+
+st.text("This model was generated using a data-only approach, i.e. no prior knowledge of the reaction mechanism was used. \n")
+st.text("To see it working, input the SMILES of the molecule you are interested in, then run the model. No data is stored in this version of the app.")
+
+
+        
 col1, col2 = st.columns(2)
 
 
