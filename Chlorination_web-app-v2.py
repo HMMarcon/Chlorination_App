@@ -209,7 +209,7 @@ st.text("This app predicts the most likely product of a chlorination reaction on
         "A list of possible products is then generated from the SM and the product with the most similar FP to the predicted one is selected as the predicted product. "
         "Below you can see a general scheme of the workflow\n ")
 
-st.image("workflow.png", height=500)
+#st.image("workflow.png", height=500)
 
 st.text("This model was generated using a data-only approach, i.e. no prior knowledge of the reaction mechanism was used. \n")
 st.text("To see it working, input the SMILES of the molecule you are interested in, then run the model. No data is stored in this version of the app.")
