@@ -204,17 +204,17 @@ def run_model_svd(model_key, mol):
         return predicted_product
 
 
-st.text("This app predicts the most likely product of a chlorination reaction on an aromatic \n systems. "
+st.markdown("This app predicts the most likely product of a chlorination reaction on an aromatic \n systems. "
         "The model is based on extracting the Morgan fingerprints of starting \n materials (SM), using a tuned ML model to predict the fingerprint of the product.\n"
         "A list of possible products is then generated from the SM and the product with the \n most similar FP to the predicted one is selected as the predicted product. \n"
         "Below you can see a general scheme of the workflow: \n ")
 
 st.image("workflow.png", use_column_width=True)
 
-st.text("This model was generated using a data-only approach, i.e. no prior knowledge of the \n reaction mechanism was used. "
+st.markdown("This model was generated using a data-only approach, i.e. no prior knowledge of the \n reaction mechanism was used. "
         "To see it working, input the SMILES of the molecule \n you are interested in, then run the model.")
 
-st.text("Disclaimer: No data is stored in this version of the app.")
+st.markdown("Disclaimer: No data is stored in this version of the app.")
 st.markdown("----------------------------------------------------------------")
 
         
