@@ -222,7 +222,7 @@ col1, col2 = st.columns(2)
 
 
 with col1:
-    st.text('Enter the SMILES string below or select \n a molecule from our validation set:')
+    st.markdown('Enter the SMILES string below or select a molecule from our validation set:')
     input_type = st.radio("Select your input method:", ("Validation set", "SMILES string"))
 
 
@@ -249,34 +249,33 @@ with col1:
 
 
 with col2:
-    col11, col22 = st.columns(2)
+    #col11, col22 = st.columns(2)
 
-    with col11:
+    #with col11:
         #Show possible products
-        potential_products = possible_prods(mol)
-        st.text('Possible products:')
+    potential_products = possible_prods(mol)
+        #st.text('Possible products:')
 
-        products = []
-        products_image = []
+    products = []
+    products_image = []
 
-        for potential_product in potential_products:
-            products.append(Chem.MolFromSmiles(potential_product))
-            products_image.append(Draw.MolToImage(Chem.MolFromSmiles(potential_product), size=(100, 100)))
+    st.markdown("#### Predicted chlorination product")
 
-        if len(potential_products) == 0:
-            st.text('No possible products found')
-        else:
-            st.image(products_image)
+    for potential_product in potential_products:
+        products.append(Chem.MolFromSmiles(potential_product))
+        products_image.append(Draw.MolToImage(Chem.MolFromSmiles(potential_product), size=(100, 100)))
 
-    with col22:
-        selected_product = st.radio("Select the major product:", options=range(len(products)), on_change=None)
-        st.image(products_image[selected_product])
+    if len(potential_products) == 0:
+        st.text('No possible products found')
+    #else:
+    #    st.image(products_image)
+
+    predictions = {"ML prediction": Chem.MolFromSmiles(run_model_fp("Ridge", mol))}
+    #selected_product = st.radio("Select the major product:", options=range(len(products)), on_change=None)
+    st.image(Draw.MolToImage(predictions["ML prediction"]))
 
 
-        run_models = st.button("Refresh model output")
-
-        #if run_models:
-            #st.write("Running models...tbd")
+    run_models = st.button("Refresh model output")
 
 
 #predictions = {"Your Choice": products[selected_product],
@@ -292,13 +291,10 @@ with col2:
 #               "AdaBoostRegressor": Chem.MolFromSmiles(run_model_svd("AdaBoostRegressor", mol))
 #               }
 
-predictions = {"Your Choice": products[selected_product],
-               "Ridge": Chem.MolFromSmiles(run_model_fp("Ridge", mol))
-               }
 
 #Model outputs!
 st.markdown("----------------------------------------------------------------")
-st.markdown("### Model outputs")
+st.markdown("### Possible products list")
 
 col1, col2, col3 = st.columns(3)
 
