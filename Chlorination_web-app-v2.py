@@ -15,6 +15,7 @@ from rdkit.Chem import Draw
 from rdkit.Chem.Draw import IPythonConsole
 from rdkit import DataStructs
 from rdkit.Chem import AllChem
+from rdkit.Chem.PandasTools import LoadSDF
 from rdkit.Chem import Descriptors
 
 # A few settings to improve the quality of structures
@@ -229,7 +230,7 @@ def run_model_fp(model_key, mol):
             similarity_mod_Z = modified_z_score(similarity_mcc)
             similarity_proba = z_score_to_probability(similarity_mod_Z)
             similarity = similarity_proba
-            similarity = (similarity) / (max(similarity) - min(similarity))
+            similarity = (similarity - min(similarity)) / (max(similarity) - min(similarity))
             similarity = similarity * similarity_mcc
 
 
@@ -280,16 +281,25 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown('Enter the SMILES string below or select a molecule from our validation set:')
-    input_type = st.radio("Select your input method:", ("Validation set", "SMILES string"))
+    input_type = st.radio("Select your input method:", ("Validation set", "SMILES string", "SDF file"))
 
-    if input_type == "Validation set":
-        st.write("Validation set")
+    if input_type == "Tutorial molecule":
+        st.write("Tutorial molecule")
         smiles_string = ("CC1=CC=CC2=C1C=CC=C2")
 
     elif input_type == "SMILES string":
 
         smiles_string = st.text_input('SMILES String')
 
+    elif input_type == "SDF file":
+        sdf_file = st.file_uploader("Upload SDF file", type=["sdf"])
+        if sdf_file is not None:
+            sdf_smiles = LoadSDF(sdf_file, smilesName='SMILES')["SMILES"]
+            entry = 0
+            if len(sdf_smiles) > 1:
+                st.markdown("More than one molecule in file. Select the one to be used:")
+                entry = st.slider("Select molecule", 1, len(sdf_smiles), step = 1) - 1
+            smiles_string = sdf_smiles[entry]
     mol = Chem.MolFromSmiles(smiles_string)
 
     if mol is not None:
