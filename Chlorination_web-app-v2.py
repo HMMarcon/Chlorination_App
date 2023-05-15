@@ -257,16 +257,21 @@ def run_model_svd(model_key, mol):
 
 
 
-st.markdown("This app predicts the most likely product of a chlorination reaction on an aromatic \n systems. "
-            "The model is based on extracting the Morgan fingerprints of starting \n materials (SM), using a tuned ML model to predict the fingerprint of the product.\n"
-            "A list of possible products is then generated from the SM and the product with the \n most similar FP to the predicted one is selected as the predicted product. \n"
-            "Below you can see a general scheme of the workflow: \n ")
+st.markdown("This app predicts the most likely product of a chlorination reaction on an aromatic systems. "
+            "The model is based on extracting the Morgan fingerprints of starting materials (SM), using a tuned ML "
+            "model to predict the fingerprint of the product. A list of possible products is then generated from "
+            "the SM and the product with the most similar FP to the predicted one is selected as the predicted product."
+            "Below you can see a general scheme of the workflow: ")
 
 st.image("workflow.png", use_column_width=True)
 
 st.markdown(
-    "This model was generated using a data-only approach, i.e. no prior knowledge of the \n reaction mechanism was used. "
-    "To see it working, input the SMILES of the molecule \n you are interested in, then run the model.")
+    "This model was generated using a data-only approach, i.e. no prior knowledge of the reaction mechanism was used. "
+    "To see it working, input the SMILES of the molecule you are interested in, then run the model.")
+
+st.markdown("It also give a confidence score for the prediction, which is based on the predicted FP similarity "
+            "and the similarity distribution within the range of possible products."
+            "its distribution among different possible products")
 
 st.markdown("Disclaimer: No data is stored in this version of the app.")
 st.markdown("----------------------------------------------------------------")
@@ -279,7 +284,7 @@ with col1:
 
     if input_type == "Validation set":
         st.write("Validation set")
-        smiles_string = ("Cc1ccccc1")
+        smiles_string = ("CC1=CC=CC2=C1C=CC=C2")
 
     elif input_type == "SMILES string":
 
@@ -372,17 +377,16 @@ for index, row in df.iterrows():
             st.write(row['Text'])
             st.image(row['Product'], use_column_width=False)
             st.write(row['Models'])
-            st.write(row['Similarity'])
+            st.write("Confidence: ", row['Similarity'])
     elif index % 3 == 1:
         with col2:
             st.write(row['Text'])
             st.image(row['Product'], use_column_width=False)
             st.write(row['Models'])
-            st.write(row['Similarity'])
+            st.write("Confidence: ", row['Similarity'])
     elif index % 3 == 2:
         with col3:
             st.write(row['Text'])
             st.image(row['Product'], use_column_width=False)
             st.write(row['Models'])
-            st.write(row['Similarity'])
-
+            st.write("Confidence: ", row['Similarity'])
