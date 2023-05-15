@@ -300,6 +300,7 @@ with col1:
                 st.markdown("More than one molecule in file. Select the one to be used:")
                 entry = st.slider("Select molecule", 1, len(sdf_smiles), step = 1) - 1
             smiles_string = sdf_smiles[entry]
+
     mol = Chem.MolFromSmiles(smiles_string)
 
     if mol is not None:
@@ -338,6 +339,7 @@ with col2:
     similarity = run_model_fp("Ridge", mol)[1]
     # selected_product = st.radio("Select the major product:", options=range(len(products)), on_change=None)
     st.image(Draw.MolToImage(predictions["ML prediction"]))
+    st.markdown("Confidence score: " + str(round(1 + max(similarity), 4) - 1))
 
     run_models = st.button("Refresh model output")
 
