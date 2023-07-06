@@ -207,34 +207,45 @@ def run_model_fp(model_key, mol):
 
         predicted_product = compare_FP_to_products_MCC(predictions_FP, possible_prods(
             Chem.MolFromSmiles(reactant)))[2]
-
+        predicted_product_FP = compare_FP_to_products_MCC(predictions_FP, possible_prods(
+            Chem.MolFromSmiles(reactant)))[0]
         prods_FP = smiles_to_fp(possible_prods(Chem.MolFromSmiles(reactant)))
         # prods_bit = [DataStructs.cDataStructs.CreateFromBitString("".join(prod_FP.astype(str))) for prod_FP in prods_FP]
         similarity_mcc = []
-        if len(prods_FP) == 1:
-            similarity = [MCC(prods_FP, predictions_FP)]
+        similarity = []
 
-        elif len(prods_FP) == 2:
+        #if len(prods_FP) == 1:
+        #    similarity = [MCC(prods_FP, predictions_FP)]
+
+        #elif len(prods_FP) == 2:
             #Normalised MCC for two products. No real statistical meaning, just shows how much distribution favours one.
-            for prod_FP in prods_FP:
-                similarity.append(MCC(prod_FP, predictions_FP))
-            similarity = similarity / sum(similarity)
-        elif len(prods_FP) > 2:
+        #    for prod_FP in prods_FP:
+        #        similarity.append(MCC(prod_FP, predictions_FP))
+            #similarity = similarity / sum(similarity)
+        #elif len(prods_FP) > 2:
 
-            for prod_FP in prods_FP:
+        #    for prod_FP in prods_FP:
                 ## Change the similarity metric to MCC between fingerprints
-                similarity_mcc.append(MCC(prod_FP, predictions_FP))
+        #        similarity_mcc.append(MCC(prod_FP, predictions_FP))
                 #similarity = (similarity - sum(similarity)/len(similarity)) / (max(similarity) - min(similarity))
             #post-process similarity metrics to be between 0 and 1
+
             #Should just do a Student's t-test? Sure!
-            similarity_mod_Z = modified_z_score(similarity_mcc)
-            similarity_proba = z_score_to_probability(similarity_mod_Z)
-            similarity = similarity_proba
-            similarity = (similarity - min(similarity)) / (max(similarity) - min(similarity))
-            similarity = similarity * similarity_mcc
+            #Former idea of a similarity metric based on a modified Z-score. Not used anymore.
+        #    #similarity_mod_Z = modified_z_score(similarity_mcc)
+        #    #similarity_proba = z_score_to_probability(similarity_mod_Z)
+        #    #similarity = similarity_proba
+        #    #similarity = (similarity - min(similarity)) / (max(similarity) - min(similarity))
+        #    #similarity = similarity * similarity_mcc
 
 
-        return predicted_product, similarity
+        #for mcc_base in similarity_mcc:
+        #    index = similarity_mcc.index(mcc_base)
+        #    st.write(MCC(prods_FP[index],predicted_product_FP))
+        #   st.write(mcc_base)
+        #    similarity.append(mcc_base / MCC(prods_FP[index],predicted_product_FP))
+
+        return [predicted_product]#, similarity
 
 
 def run_model_svd(model_key, mol):
@@ -336,10 +347,10 @@ with col2:
     #    st.image(products_image)
 
     predictions = {"ML prediction": Chem.MolFromSmiles(run_model_fp("Ridge", mol)[0])}
-    similarity = run_model_fp("Ridge", mol)[1]
+    #similarity = run_model_fp("Ridge", mol)[1]
     # selected_product = st.radio("Select the major product:", options=range(len(products)), on_change=None)
     st.image(Draw.MolToImage(predictions["ML prediction"]))
-    st.markdown("Confidence score: " + str(round(1 + max(similarity), 4) - 1))
+    #st.markdown("Confidence score: " + str(round(1 + max(similarity), 4) - 1))
 
     run_models = st.button("Refresh model output")
 
@@ -377,8 +388,9 @@ for idx in range(len(products)):
 
 data = {'Text': ['Product %d' % i for i in range(len(products))],
         'Product': products_image,
-        'Models': model_selection,
-        'Similarity': similarity}
+        'Models': model_selection
+        #'Similarity': similarity
+        }
 
 df = pd.DataFrame(data)
 
@@ -389,16 +401,16 @@ for index, row in df.iterrows():
             st.write(row['Text'])
             st.image(row['Product'], use_column_width=False)
             st.write(row['Models'])
-            st.write("Confidence: ", row['Similarity'])
+            #st.write("Confidence: ", row['Similarity'])
     elif index % 3 == 1:
         with col2:
             st.write(row['Text'])
             st.image(row['Product'], use_column_width=False)
             st.write(row['Models'])
-            st.write("Confidence: ", row['Similarity'])
+            #st.write("Confidence: ", row['Similarity'])
     elif index % 3 == 2:
         with col3:
             st.write(row['Text'])
             st.image(row['Product'], use_column_width=False)
             st.write(row['Models'])
-            st.write("Confidence: ", row['Similarity'])
+            #st.write("Confidence: ", row['Similarity'])
