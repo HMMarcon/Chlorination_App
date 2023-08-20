@@ -350,6 +350,7 @@ with col2:
     #similarity = run_model_fp("Ridge", mol)[1]
     # selected_product = st.radio("Select the major product:", options=range(len(products)), on_change=None)
     st.image(Draw.MolToImage(predictions["ML prediction"]))
+    st.markdown("Product SMILES: " + run_model_fp("Ridge", mol)[0])
     #st.markdown("Confidence score: " + str(round(1 + max(similarity), 4) - 1))
 
     run_models = st.button("Refresh model output")
