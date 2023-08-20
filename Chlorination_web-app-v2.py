@@ -44,8 +44,8 @@ plt_parameters = plt.rcParams
 plt.rcParams.update(plt_parameters)  # to reset parameters back to plt from sns
 
 # For interacting with molecules as widgets
-from ipywidgets import interact
-import ipywidgets as widgets
+# from ipywidgets import interact
+# import ipywidgets as widgets
 
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.multioutput import MultiOutputRegressor
