@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_ketcher import st_ketcher
 
 # Data loading and management
 import pandas as pd
@@ -292,11 +293,14 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown('Enter the SMILES string below or select a molecule from our validation set:')
-    input_type = st.radio("Select your input method:", ("Tutorial molecule", "SMILES string", "SDF file"))
+    input_type = st.radio("Select your input method:", ("Tutorial molecule", "Draw your molecule", "SMILES string", "SDF file"))
 
     if input_type == "Tutorial molecule":
         st.write("Tutorial molecule")
         smiles_string = ("CC1=CC=CC2=C1C=CC=C2")
+
+    elif input_type == "Draw your molecule":
+        smiles_string = st_ketcher()
 
     elif input_type == "SMILES string":
 
