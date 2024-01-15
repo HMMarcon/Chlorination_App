@@ -73,7 +73,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import BayesianRidge
 
 # Fingerprints functions
-fp_size = [1024]
+fp_size = [2048]
 fp_radius = [2]
 
 
