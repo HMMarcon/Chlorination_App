@@ -164,10 +164,12 @@ def compare_FP_to_products_MCC(pred_FP, products):
     return prods_FP[most_similar], similarity_results[most_similar], products[most_similar]
 
 
+
+def load_models_old():
+    return pickle.load(open("model_fp2fp_Ridge_7.5.mlpickle", "rb"))
 @st.cache_resource
 def load_models():
-    return pickle.load(open("model_fp2fp_Ridge_7.5.mlpickle", "rb"))
-
+    return pickle.load(open("superset_model.pkl", "rb"))
 
 # @st.cache_resource
 # def load_svd():
