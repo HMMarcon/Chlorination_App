@@ -1,5 +1,6 @@
 import streamlit as st
 from streamlit_ketcher import st_ketcher
+st.set_page_config(layout="wide")
 
 # Data loading and management
 import pandas as pd
@@ -18,6 +19,8 @@ from rdkit import DataStructs
 from rdkit.Chem import AllChem
 from rdkit.Chem.PandasTools import LoadSDF
 from rdkit.Chem import Descriptors
+from rdkit.Chem.Draw import rdMolDraw2D
+from rdkit.Chem import rdChemReactions as Reactions
 
 # A few settings to improve the quality of structures
 from rdkit.Chem import rdDepictor
@@ -138,7 +141,15 @@ def possible_prods(starting_material):
     potential_products = [Chem.MolToSmiles(molecule) for molecule in potential_products]
     return potential_products
 
-
+def count_halogenations(mol):
+    molecule = Chem.AddHs(mol)
+    nb_halogens = 0
+    for atom in molecule.GetAtoms():
+        if atom.GetSymbol() == 'H':
+            for neighbour in atom.GetNeighbors():
+                if neighbour.GetIsAromatic() and neighbour.GetAtomicNum() == 6:
+                    nb_halogens += 1
+    return nb_halogens
 def compare_FP_to_products_MCC(pred_FP, products):
     """
     Input
@@ -269,13 +280,12 @@ def run_model_svd(model_key, mol):
             2]
         return predicted_product
 
+intro_col1, intro_col2 = st.columns(2)
 
-
-
-st.markdown("This app predicts the most likely product of a chlorination reaction on an aromatic systems. "
-            "The model is based on extracting the Morgan fingerprints of starting materials (SM), using a tuned ML "
-            "model to predict the fingerprint of the product. A list of possible products is then generated from "
-            "the SM and the product with the most similar FP to the predicted one is selected as the predicted product."
+with intro_col1:
+st.markdown("This app predicts the most likely product of a halogenation reaction on an aromatic systems. "
+            "The AI model generates all possible halogenation products, and the predicted Morgan Fingerprint, "
+            "then it matches the product to the most similar FP (Selected product)."
             "Below you can see a general scheme of the workflow: ")
 
 st.image("workflow.png", use_column_width=True)
@@ -284,23 +294,23 @@ st.markdown(
     "This model was generated using a data-only approach, i.e. no prior knowledge of the reaction mechanism was used. "
     "To see it working, input the SMILES of the molecule you are interested in, then run the model.")
 
-st.markdown("It also give a confidence score for the prediction, which is based on the predicted FP similarity "
-            "and the similarity distribution within the range of possible products."
-            "its distribution among different possible products")
+#st.markdown("It also give a confidence score for the prediction, which is based on the predicted FP similarity "
+#            "and the similarity distribution within the range of possible products."
+#            "its distribution among different possible products")
 
 st.markdown("Disclaimer: No data is stored in this version of the app.")
 st.markdown("----------------------------------------------------------------")
 
-col1, col2 = st.columns(2)
+col1, col2 = st.columns([0.6, 0.4])
 
 with col1:
-    st.markdown('Enter the SMILES string below or select a molecule from our validation set:')
-    input_type = st.radio("Select your input method:", ("Draw your molecule", "SMILES string", "SDF file"))
+    st.markdown('Enter the molecule:')
+    input_type = st.radio("Select your input method:", ("Draw it", "SMILES", "SDF file"))
 
-    if input_type == "Draw your molecule":
+    if input_type == "Draw it":
         smiles_string = st_ketcher("CC1=CC=CC2=C1C=CC=C2")
 
-    elif input_type == "SMILES string":
+    elif input_type == "SMILES":
 
         smiles_string = st.text_input('SMILES String')
 
@@ -316,10 +326,7 @@ with col1:
 
     mol = Chem.MolFromSmiles(smiles_string)
 
-    if mol is not None:
-        st.text('Molecule:')
-        st.image(Draw.MolToImage(mol, size=(200, 200)))
-    else:
+    if mol is  None:
         st.text('Invalid SMILES string')
 
     show_products_bar = False
@@ -331,32 +338,91 @@ with col2:
 
     # with col11:
     # Show possible products
-    potential_products = possible_prods(mol)
-    # st.text('Possible products:')
+    st.markdown("#### Predicted chlorination product")
 
+
+    nb_halogens = st.select_slider("Number of halogenations", options=list(range(1, count_halogenations(mol)+1)), value=1)
+    st.write("Number of halogenations: ", nb_halogens)
     products = []
     products_image = []
 
-    st.markdown("#### Predicted chlorination product")
 
-    for potential_product in potential_products:
-        products.append(Chem.MolFromSmiles(potential_product))
-        products_image.append(Draw.MolToImage(Chem.MolFromSmiles(potential_product), size=(100, 100)))
+    potential_products = [Chem.MolToSmiles(mol)]
+    products_list = [mol]
+
+    for i in range(nb_halogens):
+        products = []
+        for potential_product in potential_products:
+            for new_possible_prods in possible_prods(Chem.MolFromSmiles(potential_product)):
+                #st.write(new_possible_prods)
+                products.append(new_possible_prods)
+        potential_products = products
+        #Here!
+        products_list.append(Chem.MolFromSmiles(run_model_fp("Ridge", products_list[i])[0]))
+
+    predicted_product = products_list[-1]
+
+
+
+    products_inchi = []
+    for product in products:
+        products_inchi.append(Chem.MolToInchi(Chem.MolFromSmiles(product)))
+
+    products_mol = []
+    for product in list(set(products_inchi)):
+        products_mol.append(Chem.MolFromInchi(product))
+    products = products_mol
+
+    for potential_product in products:
+        products_image.append(Draw.MolToImage(potential_product, size=(100, 100)))
+
+
+
+    # st.text('Possible products:')
+
+
+
+    predictions = {"ML prediction": predicted_product}
+    # similarity = run_model_fp("Ridge", mol)[1]
+    # selected_product = st.radio("Select the major product:", options=range(len(products)), on_change=None)
+    st.image(Draw.MolToImage(predictions["ML prediction"]))
+    st.markdown("Product SMILES: " + Chem.MolToSmiles(predicted_product))
+    # st.markdown("Confidence score: " + str(round(1 + max(similarity), 4) - 1))
+
+    model_selection = []
+
+    for idx in range(len(products)):
+        model_pick = []
+        for model in predictions.keys():
+            if Chem.MolToInchi(products[idx]) == Chem.MolToInchi(predictions[model]):
+                model_pick.append(f'{model} \n')
+                # Append to the final list which will go into the dict
+                model_selection.append(model_pick)
+            else:
+                model_selection.append("")
+
+
+    #for potential_product in potential_products:
+    #    products.append(Chem.MolFromSmiles(potential_product))
+    #    products_image.append(Draw.MolToImage(Chem.MolFromSmiles(potential_product), size=(100, 100)))
 
     if len(potential_products) == 0:
         st.text('No possible products found')
     # else:
     #    st.image(products_image)
 
-    predictions = {"ML prediction": Chem.MolFromSmiles(run_model_fp("Ridge", mol)[0])}
-    #similarity = run_model_fp("Ridge", mol)[1]
-    # selected_product = st.radio("Select the major product:", options=range(len(products)), on_change=None)
-    st.image(Draw.MolToImage(predictions["ML prediction"]))
-    st.markdown("Product SMILES: " + run_model_fp("Ridge", mol)[0])
-    #st.markdown("Confidence score: " + str(round(1 + max(similarity), 4) - 1))
 
     run_models = st.button("Refresh model output")
 
+
+rxn_string = Chem.MolToSmiles(mol)
+for molecule in products_list[1:]:
+    rxn_string += "." + Chem.MolToSmiles(molecule)
+
+st.markdown("#### Reaction scheme")
+rxn_schema = st.columns([0.5, 2*len(products_list), 0.5])[1]
+with rxn_schema:
+    st.image(Draw.MolsToImage(products_list, molsPerRow=len(products_list), subImgSize=(250, 250)), use_column_width=True)
 # predictions = {"Your Choice": products[selected_product],
 #               "Ridge": Chem.MolFromSmiles(run_model_svd("Ridge", mol)),
 #               "Ridge_10": Chem.MolFromSmiles(run_model_svd("Ridge_10", mol)),
@@ -373,23 +439,17 @@ with col2:
 
 # Model outputs!
 st.markdown("----------------------------------------------------------------")
+
 st.markdown("### Possible products list")
 
 col1, col2, col3 = st.columns(3)
 
-model_selection = []
-
-for idx in range(len(products)):
-    model_pick = []
-    for model in predictions.keys():
-        if Chem.MolToInchi(products[idx]) == Chem.MolToInchi(predictions[model]):
-            model_pick.append(f'{model} \n')  ##Use here an empty list that grows inside the for loop
+  ##Use here an empty list that grows inside the for loop
 
 
-    # Append to the final list which will go into the dict
-    model_selection.append(model_pick)
 
-data = {'Text': ['Product %d' % i for i in range(len(products))],
+
+data = {'Text': [f'Product  {i+1}' for i in range(len(products))],
         'Product': products_image,
         'Models': model_selection
         #'Similarity': similarity
