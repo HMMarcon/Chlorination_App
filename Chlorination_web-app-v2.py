@@ -309,7 +309,7 @@ with col1:
     input_type = st.radio("Select your input method:", ("Draw it", "SMILES", "SDF file"))
 
     if input_type == "Draw it":
-        smiles_string = st_ketcher("CC1=CC=CC2=C1C=CC=C2")
+        smiles_string = st_ketcher("Oc1ccccc1")
 
     elif input_type == "SMILES":
 
