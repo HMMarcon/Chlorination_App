@@ -283,16 +283,17 @@ def run_model_svd(model_key, mol):
 intro_col1, intro_col2 = st.columns(2)
 
 with intro_col1:
-st.markdown("This app predicts the most likely product of a halogenation reaction on an aromatic systems. "
-            "The AI model generates all possible halogenation products, and the predicted Morgan Fingerprint, "
-            "then it matches the product to the most similar FP (Selected product)."
-            "Below you can see a general scheme of the workflow: ")
+    st.markdown("This app predicts the most likely product of a halogenation reaction on an aromatic systems. "
+                "The AI model generates all possible halogenation products, and the predicted Morgan Fingerprint, "
+                "then it matches the product to the most similar FP (Selected product)."
+                "Below you can see a general scheme of the workflow: ")
+with intro_col2:
+    st.markdown("This model was generated using a data-only approach, i.e. no prior knowledge of the reaction mechanism was used. "
+                "To see it working, input the SMILES of the molecule you are interested in, then run the model.")
 
 st.image("workflow.png", use_column_width=True)
 
-st.markdown(
-    "This model was generated using a data-only approach, i.e. no prior knowledge of the reaction mechanism was used. "
-    "To see it working, input the SMILES of the molecule you are interested in, then run the model.")
+
 
 #st.markdown("It also give a confidence score for the prediction, which is based on the predicted FP similarity "
 #            "and the similarity distribution within the range of possible products."
