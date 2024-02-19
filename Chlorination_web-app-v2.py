@@ -249,7 +249,7 @@ with col2:
         potential_products = products
         #Here!
         products_list.append(Chem.MolFromSmiles(run_model_fp("Ridge", products_list[i])[0]))
-        st.progress((i+1)/nb_halogens, "Progress: " + str(i+1) + "/" + str(nb_halogens) + " halogenations")
+        progress_bar.progress((i+1)/nb_halogens, "Progress: " + str(i+1) + "/" + str(nb_halogens) + " halogenations")
     predicted_product = products_list[-1]
 
 
