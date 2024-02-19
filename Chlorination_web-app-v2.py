@@ -249,7 +249,7 @@ with col2:
         potential_products = products
         #Here!
         products_list.append(Chem.MolFromSmiles(run_model_fp("Ridge", products_list[i])[0]))
-        progress_bar.progress((i+1)/nb_halogens, "Progress: " + str(i+1) + "/" + str(nb_halogens) + " halogenations")
+        st.progress((i+1)/nb_halogens, "Progress: " + str(i+1) + "/" + str(nb_halogens) + " halogenations")
     predicted_product = products_list[-1]
 
 
@@ -298,7 +298,7 @@ for molecule in products_list[1:]:
 st.markdown("#### Reaction scheme")
 rxn_schema = st.columns([0.5, 2*len(products_list), 0.5])[1]
 with rxn_schema:
-    st.image(Draw.MolsToImage(products_list, molsPerRow=len(products_list), subImgSize=(250, 250)), use_column_width=False)
+    st.image(Draw.MolsToImage(products_list, molsPerRow=len(products_list), subImgSize=(200, 200)), use_column_width=False)
 
 
 # Model outputs!
