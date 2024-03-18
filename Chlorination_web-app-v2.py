@@ -143,11 +143,6 @@ def load_models_old():
 def load_models():
     return pickle.load(open("superset_model.pkl", "rb"))
 
-try:
-    fp2fp_model = load_models()
-except:
-    st.error("No model available")
-
 
 def run_model_fp(model_key, mol):
     if model_key == "Your Choice":
@@ -228,7 +223,12 @@ with col1:
 with col2:
 
     st.markdown("#### Predicted chlorination product")
-
+    try:
+        fp2fp_model = load_models()
+    except:
+        st.error("No model available")
+        st.stop()
+        
     if count_halogenations(mol) > 1:
         nb_halogens = st.select_slider("Number of halogenations", options=list(range(1, count_halogenations(mol)+1)), value=1)
     else:
