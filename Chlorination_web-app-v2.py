@@ -143,8 +143,10 @@ def load_models_old():
 def load_models():
     return pickle.load(open("superset_model.pkl", "rb"))
 
-fp2fp_model = load_models()
-
+try:
+    fp2fp_model = load_models()
+except:
+    st.error("No model available")
 
 
 def run_model_fp(model_key, mol):
